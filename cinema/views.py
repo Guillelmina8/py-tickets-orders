@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import Q, F, Count
+from django.db.models import F, Count
 from rest_framework import viewsets
 
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession, Order
@@ -11,11 +11,10 @@ from cinema.serializers import (
     CinemaHallSerializer,
     MovieSerializer,
     MovieSessionSerializer,
-    MovieSessionListSerializer,
     MovieDetailSerializer,
     MovieSessionDetailSerializer,
     MovieListSerializer,
-    OrderSerializer, OrderCreateSerializer,
+    OrderSerializer, OrderCreateSerializer, MovieSessionFullListSerializer,
 )
 
 
@@ -83,7 +82,7 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == "list":
-            return MovieSessionListSerializer
+            return MovieSessionFullListSerializer
 
         if self.action == "retrieve":
             return MovieSessionDetailSerializer
@@ -107,16 +106,16 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
                 .order_by("id")
             )
 
-        date = self.request.query_params.get("date")
-        movie_id = self.request.query_params.get("movie")
+            date = self.request.query_params.get("date")
+            movie_id = self.request.query_params.get("movie")
 
-        if date:
-            date_obj = datetime.strptime(date, "%Y-%m-%d")
-            queryset = queryset.filter(show_time__date=date_obj)
-        if movie_id:
-            queryset = queryset.filter(
-                movie__id=movie_id
-            )
+            if date:
+                date_obj = datetime.strptime(date, "%Y-%m-%d")
+                queryset = queryset.filter(show_time__date=date_obj)
+            if movie_id:
+                queryset = queryset.filter(
+                    movie__id=movie_id
+                )
         return queryset
 
 
